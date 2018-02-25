@@ -161,3 +161,36 @@ set(gca,'XTickLabel',{'150E','160E','170E','180W','170W','160W','150W','140W','1
 %set(gca,'YTick',0:10:160)
 %saveas(gcf,'../Output/orlanski h_a different.bmp')
 %box off
+%% 画 u&v 场, 并标注分叉点的位置
+clear;clc
+load map3;
+figure;
+upper_u = importdata('../Input/OBC_trans_290E_u.mat');
+upper_v = importdata('../Input/OBC_trans_290E_v.mat');
+upper_h = importdata('../Input/OBC_trans_290E_h.mat');
+H = mean(upper_h,3) + 350;
+U = mean(upper_u,3);
+V = mean(upper_v,3);
+% 120E-140E,6N-21N    u&v&H气候态场
+lon = 120:1/4:140;
+lat = 0:1/4:30;
+[X,Y]=meshgrid(lon,lat);
+%m_proj('miller','lon',[120 140],'lat',[4 21]);
+m_proj('miller','lon',[120 140],'lat',[4,21]);
+%m_proj('Equidistant Cylindrical','lon',[120 290],'lat',[0 35]);
+m_coast('patch',[.9 .9 .9],'edgecolor',[0.1 0.1 0.1],'linewidth',3);
+m_grid('linestyle','none','box','fancy','tickdir','in','fontsize',14);
+hold on
+Velocity = sqrt(U.^2+V.^2);
+U(Velocity<=0.1)=nan; 
+V(Velocity<=0.1)=nan; 
+H(Velocity<=0.04)=nan;
+scale = 2;
+m_quiver(X(1:scale:end,1:scale:end),Y(1:scale:end,1:scale:end),U(1:scale:end,1:scale:end)',V(1:scale:end,1:scale:end)',3,'k')
+[c,h] = m_contour(X(1:scale:end,1:scale:end),Y(1:scale:end,1:scale:end),H(1:scale:end,1:scale:end)','-k');
+clabel(c,h,'manual','fontsize',14,'color','k','rotation',0,'fontweight','bold','linewidth',4)
+hold on
+m_line(124,14.5,'marker','o','markersize',8,'color','k');
+%m_text(124,14.5,' M5','vertical','top');
+%colormap(map3);
+%saveas(gcf,['../Output/',num2str(EB),'E_h.jpg']);
